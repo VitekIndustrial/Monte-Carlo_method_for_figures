@@ -9,7 +9,7 @@ def send_to_clipboard(clip_type, data):
     win32clipboard.SetClipboardData(clip_type, data)
     win32clipboard.CloseClipboard()
 
-x,y = sp.symbols('x,y')
+x,y,z = sp.symbols('x,y,z')
 eqn = sp.sin(sp.sqrt(x**2 + 20)) + y/(sp.factorial(x) - 2) + (x**2 * sp.sqrt(y))/3
 f = BytesIO()
 sp.preview(eqn, viewer='BytesIO', outputbuffer=f)
