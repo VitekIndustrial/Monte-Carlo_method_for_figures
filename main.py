@@ -7,11 +7,19 @@ from io import BytesIO
 import numpy as np
 import sympy as sp
 import threading
+import math
 
 #-----------------------------------------------------------------------------------------
 x = np.arange(-2.5, 2.51, 0.01)
 root = None
 prew = ""
+ax = None
+rand_dots_x = []
+rand_dots_y = []
+rand_dots_x_in = []
+rand_dots_y_in = []
+rand_dots_x_out = []
+rand_dots_y_out = []
 #-----------------------------------------------------------------------------------------
 
 def recreate_eq_lb(imag):
@@ -61,6 +69,7 @@ def _quit():
     root.destroy()
 
 def crateplot():
+    global ax, fig, toolbar, canvas
     fig = Figure(figsize=(5, 4), dpi=100)
     ax = fig.add_subplot(111)
     ax.plot(x, np.sin(x*2) + 4, color='g')
@@ -70,16 +79,35 @@ def crateplot():
     canvas = FigureCanvasTkAgg(fig, master=root)
     canvas.draw()
     canvas.get_tk_widget().place(x=500, y=0)
-    toolbar = NavigationToolbar2Tk(canvas, root)
-    toolbar.update()
-    canvas.get_tk_widget().place(x=500, y=0)
+    #toolbar = NavigationToolbar2Tk(canvas, root)
+    #toolbar.update()
+    #canvas.get_tk_widget().place(x=500, y=0)
+
+def gen_dots_plot():
+    global rand_dots_x, rand_dots_y, rand_dots_x_in, rand_dots_y_in, rand_dots_x_out, rand_dots_y_out, ax, canvas
+    rand_dots_x = np.random.uniform(float(x1_entry.get()), float(x2_entry.get()), int(count_dots.get()))
+    rand_dots_y = np.random.uniform(0, 5, int(count_dots.get()))
+    for dot in range(len(rand_dots_x)):
+        if rand_dots_y[dot] >= 0 and rand_dots_y[dot] <= (math.sin(rand_dots_x[dot] * 2) + 4):
+            rand_dots_x_in.append(rand_dots_x[dot])
+            rand_dots_y_in.append(rand_dots_y[dot])
+        else:
+            rand_dots_x_out.append(rand_dots_x[dot])
+            rand_dots_y_out.append(rand_dots_y[dot])
+    ax.scatter(rand_dots_x_out, rand_dots_y_out, color="r", s=0.08)
+    ax.scatter(rand_dots_x_in, rand_dots_y_in, color="g", s=0.08)
+    canvas.draw()
+
+def start_gen():
+    generate = threading.Thread(target=gen_dots_plot)
+    generate.start()
 
 def result():
     ...
 
 def create_buttons():
     input_button = ttk.Button(text="Ввести формулу", command=...)
-    input_button.place(x=20, y=530)
+    input_button.place(x=40, y=530)
 
     clear_eq_button = ttk.Button(text="Удалить последнее уравнение", command=del_last_eq)
     clear_eq_button.place(x=20, y=400)
@@ -90,13 +118,13 @@ def create_buttons():
     result_button = ttk.Button(text="Вычислить площадь", command=result)
     result_button.place(x=860, y=530)
 
-    dots_gen = ttk.Button(text="Сгенерировать")
+    dots_gen = ttk.Button(text="Сгенерировать", command=start_gen)
     dots_gen.place(x=810, y=439)
 
 def create_entrys():
-    global enter_entry, x1_entry, x2_entry
+    global enter_entry, x1_entry, x2_entry, count_dots
     enter_entry = ttk.Entry()
-    enter_entry.place(x=20, y=500, width=330)
+    enter_entry.place(x=40, y=500, width=330)
 
     x1_entry = ttk.Entry()
     x1_entry.place(x=670, y=410, width=50)
@@ -109,6 +137,11 @@ def create_entrys():
 
 def create_labels():
     global  eq_img_lb
+
+    y_label = ttk.Label(text="f(x) =")
+    y_label.configure(background="white")
+    y_label.place(x=10, y=500)
+
     x1_label = ttk.Label(text="X от")
     x1_label.configure(background="white")
     x1_label.place(x=640, y=410)
