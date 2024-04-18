@@ -18,23 +18,12 @@ def recreate_eq_lb(imag):
     eq_img_lb.config(image=imag)
     eq_img_lb.image = imag
     eq_img_lb.place(x=50, y=440)
-def addeq():
-    yr = enter_entry.get()
-    eq = (sp.sympify(yr))
-    f = BytesIO()
-    sp.preview(eq, viewer='BytesIO', outputbuffer=f)
-    sp.preview(eq, viewer='file', filename='1.png')
-    f.seek(0)
-    img_eq = Image.open(f)
-    tkimg_eq = ImageTk.PhotoImage(img_eq)
-    recreate_eq_lb(tkimg_eq)
 
 def update_eq(prew):
     try:
         eq = (sp.sympify(prew))
         f = BytesIO()
         sp.preview(eq, viewer='BytesIO', outputbuffer=f)
-        sp.preview(eq, viewer='file', filename='1.png')
         f.seek(0)
         img_eq = Image.open(f)
         tkimg_eq = ImageTk.PhotoImage(img_eq)
@@ -48,6 +37,8 @@ def start_eq_loop():
         prew = enter_entry.get()
         eq_loop = threading.Thread(target=update_eq, args=(prew,))
         eq_loop.start()
+    if enter_entry.get() == "":
+        recreate_eq_lb(None)
     root.after(500, start_eq_loop)
 
 def del_last_eq():
@@ -87,7 +78,7 @@ def result():
     ...
 
 def create_buttons():
-    input_button = ttk.Button(text="Ввести формулу", command=addeq)
+    input_button = ttk.Button(text="Ввести формулу", command=...)
     input_button.place(x=20, y=530)
 
     clear_eq_button = ttk.Button(text="Удалить последнее уравнение", command=del_last_eq)
@@ -98,6 +89,9 @@ def create_buttons():
 
     result_button = ttk.Button(text="Вычислить площадь", command=result)
     result_button.place(x=860, y=530)
+
+    dots_gen = ttk.Button(text="Сгенерировать")
+    dots_gen.place(x=810, y=439)
 
 def create_entrys():
     global enter_entry, x1_entry, x2_entry
@@ -110,6 +104,9 @@ def create_entrys():
     x2_entry = ttk.Entry()
     x2_entry.place(x=790, y=410, width=50)
 
+    count_dots = ttk.Entry()
+    count_dots.place(x=700, y=440, width=100)
+
 def create_labels():
     global  eq_img_lb
     x1_label = ttk.Label(text="X от")
@@ -120,9 +117,14 @@ def create_labels():
     x2_label.configure(background="white")
     x2_label.place(x=760, y=410)
 
+    dots_count_label = ttk.Label(text="Кол-во точек:")
+    dots_count_label.configure(background="white")
+    dots_count_label.place(x=620, y=440)
+
     eq_img_lb = Label(root)
-    eq_img_lb.place(x=20, y=20)
-#Добавить ввод кол-ва точек и кнопку их генерации
+    eq_img_lb.configure(bg="white")
+    eq_img_lb.place(x=50, y=440)
+
 if __name__ == "__main__":
     root = createRootWindow()
     root.protocol("WM_DELETE_WINDOW", _quit)
