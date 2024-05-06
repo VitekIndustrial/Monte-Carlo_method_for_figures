@@ -1,276 +1,101 @@
 from tkinter import *
 from tkinter import ttk
-from PIL import Image, ImageTk, ImageFont, ImageDraw
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 from matplotlib.figure import Figure
-from io import BytesIO
-import numpy as np
-import sympy as sp
-import threading
-import math
 
-#-----------------------------------------------------------------------------------------
-#x = np.arange(-2.5, 2.51, 0.01)
-x, pi, e = sp.symbols('x, pi, e')
-root = None
-prew = ""
-ax = None
-rand_dots_x = []
-rand_dots_y = []
-rand_dots_x_in = []
-rand_dots_y_in = []
-rand_dots_x_out = []
-rand_dots_y_out = []
-eqs = []
-len_eqs_prew = 0
-font = ImageFont.truetype('arial.ttf', 15)
-flg_dots = False
-# dots_red = None
-# dots_green = None
-x1_prew = ""
-x2_prew = ""
-#-----------------------------------------------------------------------------------------
+class Window(Tk):
+    def __init__(self):
+        super().__init__()
 
-def recreate_eq_lb(imag):
-    eq_img_lb.config(image=imag)
-    eq_img_lb.image = imag
-    eq_img_lb.place(x=50, y=440)
+        self.title("Window")
+        self.geometry("1000x600")
+        self.configure(bg="white")
+        self.resizable(False, False)
 
-def update_eq(prew):
-    try:
-        eq = (sp.sympify(prew))
-        f = BytesIO()
-        sp.preview(eq, viewer='BytesIO', outputbuffer=f)
-        f.seek(0)
-        img_eq = Image.open(f)
-        tkimg_eq = ImageTk.PhotoImage(img_eq)
-        recreate_eq_lb(tkimg_eq)
-    except:
-        ...
+        self.create_buttons()
+        self.create_entrys()
+        self.create_labels()
+        self.create_plot()
 
-def update_eqs():
-    eqs_image = Image.new('RGB', (300, len(eqs)*45), (255, 255, 255))
-    drawer = ImageDraw.Draw(eqs_image)
-    prew_y = 0
-    for i, eqq in enumerate(eqs):
-        try:
-            eq = (sp.sympify(eqq))
-            f = BytesIO()
-            sp.preview(eq, viewer='BytesIO', outputbuffer=f)
-            f.seek(0)
-            img_eq = Image.open(f)
-            #tkimg_eq = ImageTk.PhotoImage(img_eq)
-            drawer.text((2, prew_y + (img_eq.size[1] // 2) - 8), f'{i+1})', font=font, fill='black')
-            eqs_image.paste(img_eq, (25, prew_y))
-            prew_y += img_eq.size[1] + 10
+        self.protocol("WM_DELETE_WINDOW", self._quit)
 
-            # print(img_eq.size[1])
-            # print(i*44 + (img_eq.size[1] // 2) - 7)
-        except:
-            ...
-    eqs_image = ImageTk.PhotoImage(eqs_image)
-    eqs_img_lb.config(image=eqs_image)
-    eqs_img_lb.image = eqs_image
-    eqs_img_lb.place(x=20, y=20)
+    def create_buttons(self):
+        self.input_button = ttk.Button(text="Ввести формулу")#, command=add_eq)
+        self.input_button.place(x=40, y=530)
 
-def start_eq_loop():
-    global prew, len_eqs_prew, x1_prew, x2_prew
-    if prew != enter_entry.get():
-        prew = enter_entry.get()
-        eq_loop = threading.Thread(target=update_eq, args=(prew,))
-        eq_loop.start()
-    if enter_entry.get() == "":
-        recreate_eq_lb(None)
-    if len_eqs_prew != len(eqs) or x1_prew != x1_entry.get() or x2_prew != x2_entry.get():
-        len_eqs_prew = len(eqs)
-        x1_prew = x1_entry.get()
-        x2_prew = x2_entry.get()
-        eqs_loop = threading.Thread(target=update_eqs)
-        add_plot = threading.Thread(target=add_all_plot)
-        eqs_loop.start()
-        add_plot.start()
+        self.clear_eq_button = ttk.Button(text="Удалить последнее уравнение")#, command=del_last_eq)
+        self.clear_eq_button.place(x=20, y=400)
 
-    root.after(500, start_eq_loop)
+        self.clear_all_eq_button = ttk.Button(text="Удалить все уравнения")#, command=del_all_eq)
+        self.clear_all_eq_button.place(x=215, y=400)
 
-# def start_eqs_loop():
-#     global len_eqs_prew
-#     if len_eqs_prew != len(eqs):
-#         len_eqs_prew = len(eqs)
-#         eqs_loop = threading.Thread(target=update_eqs)
-#         eqs_loop.start()
-#     root.after(500, start_eqs_loop)
+        self.result_button = ttk.Button(text="Вычислить площадь")#, command=result)
+        self.result_button.place(x=860, y=530)
 
-def del_last_eq():
-    del eqs[-1]
+        self.dots_gen = ttk.Button(text="Сгенерировать")#, command=start_gen)
+        self.dots_gen.place(x=810, y=439)
 
-def del_all_eq():
-    eqs.clear()
+    def create_entrys(self):
+        #global enter_entry, x1_entry, x2_entry, count_dots
+        self.enter_entry = ttk.Entry()
+        self.enter_entry.place(x=40, y=500, width=330)
 
-def add_eq():
-    eqs.append(enter_entry.get())
+        self.x1_entry = ttk.Entry()
+        self.x1_entry.place(x=670, y=410, width=50)
 
-def createRootWindow(title: str = "Title", icon: str = "", size_window: set = (1000, 600), resize_window: set = (False, False)):
-    root = Tk()
-    root.title(title)
-    root.configure(bg="white")
-    if icon != "": root.iconbitmap(icon)
-    root.geometry(f'{size_window[0]}x{size_window[1]}')
-    root.resizable(resize_window[0], resize_window[1])
-    return root
+        self.x2_entry = ttk.Entry()
+        self.x2_entry.place(x=790, y=410, width=50)
 
-def _quit():
-    root.quit()
-    root.destroy()
+        self.count_dots = ttk.Entry()
+        self.count_dots.place(x=700, y=440, width=100)
 
-def createplot():
-    global ax, toolbar, canvas
-    fig = Figure(figsize=(5, 4), dpi=100)
-    ax = fig.add_subplot(111)
-    ax.grid(True)
-    # ax.plot(x, np.sin(x*2) + 4, color='g')
-    # ax.plot(x, x * 0)
-    # ax.axvline(x=-2, color='b', linestyle='-')  # Вертикальная линия
-    # ax.axvline(x=2, color='g', linestyle='-')  # Вертикальная линия
-    canvas = FigureCanvasTkAgg(fig, master=root)
-    canvas.draw()
-    canvas.get_tk_widget().place(x=500, y=0)
-    toolbar = NavigationToolbar2Tk(canvas, root)
-    toolbar.update()
-    canvas.get_tk_widget().place(x=500, y=0)
+    def create_labels(self):
+        #global eq_img_lb, eqs_img_lb
 
-def add_all_plot():
-    global ax, canvas
-    ax.cla()
-    ax.grid(True)
-    x1 = float(x1_entry.get())
-    x2 = float(x2_entry.get())
-    ax.axvline(x=x1, color='b', linestyle='-')  # Вертикальная линия
-    ax.axvline(x=x2, color='b', linestyle='-')  # Вертикальная линия
-    x_arr = np.arange(x1 - 0.5, x2 + 0.51, 0.01)
-    # print(eqs)
-    for ex in eqs:
-        y_arr = []
-        eq = (sp.sympify(ex))
-        for one_x_arr in x_arr:
-            if isinstance(eq.evalf(subs={x: one_x_arr, pi: sp.pi, e: sp.E}), sp.core.numbers.Float) or isinstance(eq.evalf(subs={x: one_x_arr, pi: sp.pi, e: sp.E}), sp.core.numbers.Integer):
-            #print(type(eq.evalf(subs={x: one_x_arr, pi: sp.pi, e: sp.E})))
-                y_arr.append(eq.evalf(subs={x: one_x_arr, pi: sp.pi, e: sp.E}))
-        print(y_arr)
-        #print(len(x_arr[:len(y_arr) + 1]), len(y_arr))
-        if len(y_arr) != len(x_arr):
-            ax.plot(x_arr[len(y_arr) + 1:], y_arr)
-        else:
-            ax.plot(x_arr, y_arr)
+        self.y_label = ttk.Label(text="f(x) =")
+        self.y_label.configure(background="white")
+        self.y_label.place(x=10, y=500)
 
-    canvas.draw()
+        self.x1_label = ttk.Label(text="X от")
+        self.x1_label.configure(background="white")
+        self.x1_label.place(x=640, y=410)
 
-def gen_dots_plot():
-    global rand_dots_x, rand_dots_y, rand_dots_x_in, rand_dots_y_in, rand_dots_x_out, rand_dots_y_out, ax, canvas#, dots_red, dots_green
-    # try:
-    #     dots_red = ax.scatter()
-    #     dots_green = ax.scatter()
-    # except:
-    #     ...
-    # if flg_dots:
-    #     dots_red.remove()
-    #     dots_green.remove()
-    #     print("YES")
-    #canvas.draw()
-    rand_dots_x = np.random.uniform(float(x1_entry.get()), float(x2_entry.get()), int(count_dots.get()))
-    rand_dots_y = np.random.uniform(0, 5, int(count_dots.get()))
-    for dot in range(len(rand_dots_x)):
-        if rand_dots_y[dot] >= 0 and rand_dots_y[dot] <= (math.sin(rand_dots_x[dot] * 2) + 4):
-            rand_dots_x_in.append(rand_dots_x[dot])
-            rand_dots_y_in.append(rand_dots_y[dot])
-        else:
-            rand_dots_x_out.append(rand_dots_x[dot])
-            rand_dots_y_out.append(rand_dots_y[dot])
-    #add_all_plot()
-    dots_red = ax.scatter(rand_dots_x_out, rand_dots_y_out, color="r", s=0.08)
-    dots_green = ax.scatter(rand_dots_x_in, rand_dots_y_in, color="g", s=0.08)
-    # if not flg_dots:
-    #     flg_dots = not flg_dots
-    #     print("TRUE")
-    canvas.draw()
-    #scatter_objs = [dots_red]
-    #print([ob.get_label() for ob in [dots_red]])
-    # for scat in scatter_objs:
-    #     print("YES")
-    #     scat.remove()
-    # dots_red.remove()
-    # dots_green.remove()
+        self.x2_label = ttk.Label(text="X до")
+        self.x2_label.configure(background="white")
+        self.x2_label.place(x=760, y=410)
 
+        self.dots_count_label = ttk.Label(text="Кол-во точек:")
+        self.dots_count_label.configure(background="white")
+        self.dots_count_label.place(x=620, y=440)
 
-def start_gen():
-    generate = threading.Thread(target=gen_dots_plot)
-    generate.start()
+        self.eq_img_lb = Label()#root)
+        self.eq_img_lb.configure(bg="black") #white
+        self.eq_img_lb.place(x=50, y=440)
 
-def result():
-    ...
+        self.eqs_img_lb = Label()#root)
+        self.eqs_img_lb.configure(bg="black") #white
+        # eqs_img_lb.place(x=5, y=5)
 
-def create_buttons():
-    input_button = ttk.Button(text="Ввести формулу", command=add_eq)
-    input_button.place(x=40, y=530)
+    def create_plot(self):
+        #global ax, toolbar, canvas
+        self.fig = Figure(figsize=(5, 4), dpi=100)
+        self.ax = self.fig.add_subplot(111)
+        self.ax.grid(True)
+        # ax.plot(x, np.sin(x*2) + 4, color='g')
+        # ax.plot(x, x * 0)
+        # ax.axvline(x=-2, color='b', linestyle='-')  # Вертикальная линия
+        # ax.axvline(x=2, color='g', linestyle='-')  # Вертикальная линия
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().place(x=500, y=0)
+        self.toolbar = NavigationToolbar2Tk(self.canvas, self)
+        self.toolbar.update()
+        self.canvas.get_tk_widget().place(x=500, y=0)
 
-    clear_eq_button = ttk.Button(text="Удалить последнее уравнение", command=del_last_eq)
-    clear_eq_button.place(x=20, y=400)
-
-    clear_all_eq_button = ttk.Button(text="Удалить все уравнения", command=del_all_eq)
-    clear_all_eq_button.place(x=215, y=400)
-
-    result_button = ttk.Button(text="Вычислить площадь", command=result)
-    result_button.place(x=860, y=530)
-
-    dots_gen = ttk.Button(text="Сгенерировать", command=start_gen)
-    dots_gen.place(x=810, y=439)
-
-def create_entrys():
-    global enter_entry, x1_entry, x2_entry, count_dots
-    enter_entry = ttk.Entry()
-    enter_entry.place(x=40, y=500, width=330)
-
-    x1_entry = ttk.Entry()
-    x1_entry.place(x=670, y=410, width=50)
-
-    x2_entry = ttk.Entry()
-    x2_entry.place(x=790, y=410, width=50)
-
-    count_dots = ttk.Entry()
-    count_dots.place(x=700, y=440, width=100)
-
-def create_labels():
-    global  eq_img_lb, eqs_img_lb
-
-    y_label = ttk.Label(text="f(x) =")
-    y_label.configure(background="white")
-    y_label.place(x=10, y=500)
-
-    x1_label = ttk.Label(text="X от")
-    x1_label.configure(background="white")
-    x1_label.place(x=640, y=410)
-
-    x2_label = ttk.Label(text="X до")
-    x2_label.configure(background="white")
-    x2_label.place(x=760, y=410)
-
-    dots_count_label = ttk.Label(text="Кол-во точек:")
-    dots_count_label.configure(background="white")
-    dots_count_label.place(x=620, y=440)
-
-    eq_img_lb = Label(root)
-    eq_img_lb.configure(bg="white")
-    eq_img_lb.place(x=50, y=440)
-
-    eqs_img_lb = Label(root)
-    eqs_img_lb.configure(bg="white")
-    #eqs_img_lb.place(x=5, y=5)
+    def _quit(self):
+        self.quit()
+        self.destroy()
 
 if __name__ == "__main__":
-    root = createRootWindow()
-    root.protocol("WM_DELETE_WINDOW", _quit)
-    create_buttons()
-    create_entrys()
-    create_labels()
-    createplot()
-    root.after(1000, start_eq_loop)
-    root.mainloop()
+    window = Window()
+    window.mainloop()
