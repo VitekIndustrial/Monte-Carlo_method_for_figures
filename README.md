@@ -6,3 +6,6 @@ Calculating the area of plane figures using the Monte Carlo method
 
 ## Генерация случайных точек на графике matplotlib в Tkinter
 [![Генерация случайных точек на графике matplotlib в Tkinter](http://img.youtube.com/vi/RjCTWWnXlys/0.jpg)](http://www.youtube.com/watch?v=RjCTWWnXlys "Генерация случайных точек на графике matplotlib в Tkinter")
+
+## Добавление, вывод и отрисовка графиков из Latex'а
+[![Добавление, вывод и отрисовка графиков из Latex'а](http://img.youtube.com/vi/q0zUartQg3Q/0.jpg)](http://www.youtube.com/watch?v=q0zUartQg3Q "Добавление, вывод и отрисовка графиков из Latex'а")
