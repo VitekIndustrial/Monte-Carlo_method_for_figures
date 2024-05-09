@@ -9,3 +9,6 @@ Calculating the area of plane figures using the Monte Carlo method
 
 ## Добавление, вывод и отрисовка графиков из Latex'а
 [![Добавление, вывод и отрисовка графиков из Latex'а](http://img.youtube.com/vi/q0zUartQg3Q/0.jpg)](http://www.youtube.com/watch?v=q0zUartQg3Q "Добавление, вывод и отрисовка графиков из Latex'а")
+
+## Финишная прямая
+[![Программа для вычисления площади плоских фигур методом Монте-Карло на финишной прямой!](http://img.youtube.com/vi/YUPurgQLvMs/0.jpg)](http://www.youtube.com/watch?v=YUPurgQLvMs "Программа для вычисления площади плоских фигур методом Монте-Карло на финишной прямой!")
